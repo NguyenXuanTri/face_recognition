@@ -64,38 +64,4 @@ class FaceDetector:
 
         return face
 
-'''
-class FACELOADING(FaceDetector):
-    # Khởi tạo đối tượng FACELOADING với đường dẫn thư mục chứa dataset
-    def __init__(self, directory: ImagePath):
-        super().__init__()
-        self.directory = directory
-        self.X = []
-        self.Y = []
-
-    # Tải tất cả các khuôn mặt từ thư mục dataset, trả về mảng X (ảnh) và Y (nhãn)
-    def load_faces(self, directory: ImagePath):
-        faces = []
-        for image_name in os.listdir(directory):
-            image_path = join(directory, image_name)
-            try:
-                faces.append(self.extract_face(image_path))
-            except (OSError, ValueError) as error:
-                logging.warning("Skipping image %s: %s", image_path, error)
-        return faces
-
-    # Tải tất cả các lớp (subdirectory) từ thư mục dataset, trả về mảng X (ảnh) và Y (nhãn)
-    def load_classes(self):
-        for subdirectory in os.listdir(self.directory):
-            directory = join(self.directory, subdirectory)
-            faces = self.load_faces(directory)
-            labels = [subdirectory for _ in range(len(faces))]
-
-            print(f"Loaded successfully: {len(labels)}")
-            self.X.extend(faces)
-            self.Y.extend(labels)
-
-        return np.asarray(self.X), np.asarray(self.Y)
-'''
-
 
