@@ -13,7 +13,6 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-from facenet_pytorch import MTCNN
 
 import cv2
 import numpy as np
@@ -98,11 +97,11 @@ class FaceDetector:
         min_confidence: float = 0.90,
         context_scale: float = 1.5,
     ) -> None:
-        """detector: đối tượng có detect_faces(rgb) kiểu MTCNN; None -> tạo MTCNN."""
+        """detector: facenet-pytorch MTCNN hoặc đối tượng có detect_faces(rgb)."""
         if detector is None:
             from facenet_pytorch import MTCNN  # import trễ để module nhẹ khi không cần
 
-            detector = MTCNN()
+            detector = MTCNN(keep_all=True)
         self._detector = detector
         self.min_confidence = min_confidence
         self.context_scale = context_scale
@@ -117,8 +116,31 @@ class FaceDetector:
         h_img, w_img = frame_rgb.shape[:2]
 
         faces: List[DetectedFace] = []
-        for item in self._detector.detect_faces(frame_rgb):
-            confidence = float(item.get("confidence", 0.0))
+        if hasattr(self._detector, "detect_faces"):
+            detections = self._detector.detect_faces(frame_rgb)
+        else:
+            boxes, probabilities, points = self._detector.detect(
+                frame_rgb, landmarks=True
+            )
+            detections = []
+            if boxes is not None and probabilities is not None:
+                for index, (coords, probability) in enumerate(
+                    zip(boxes, probabilities)
+                ):
+                    if coords is None or probability is None:
+                        continue
+                    keypoints = {}
+                    if points is not None and points[index] is not None:
+                        keypoints = dict(zip(LANDMARK_NAMES, points[index]))
+                    x1, y1, x2, y2 = coords
+                    detections.append({
+                        "box": (x1, y1, x2 - x1, y2 - y1),
+                        "confidence": probability,
+                        "keypoints": keypoints,
+                    })
+
+        for item in detections:
+            confidence = float(item.get("confidence") or 0.0)
             if confidence < self.min_confidence:
                 continue
             x, y, w, h = item["box"]
