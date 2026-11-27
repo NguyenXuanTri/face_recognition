@@ -1,0 +1,4 @@
+dataset,mode,attack_type,n_frames,APCER
+casia,lbp,cut,4973,0.0245324753669817
+casia,lbp,replay,5255,0.013891531874405328
+casia,lbp,warped,6481,0.05369541737386206
