@@ -63,6 +63,8 @@ def tag(value: str, name: str) -> str:
 
 
 def to_jsonable(value):
+    if isinstance(value, dict):
+        return {str(k): to_jsonable(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [to_jsonable(v) for v in value]
     if isinstance(value, (np.integer, np.floating)):
